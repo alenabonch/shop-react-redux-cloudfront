@@ -69,3 +69,28 @@ Combination of `cloudfront:setup` and `cloudfront:build:deploy` commands with or
 ### `serverless:remove`
 
 Remove an entire stack configured in `serverless.yml` via CloudFormation.
+
+Module 2 
+Implementation Notes
+
+Manual Deployment to S3
+1. Created a public bucket my-first-live-app
+2. Properties: Enabled static website hosting, set index.html
+3. Object ownership: ACLs enabled
+4. ACL: everyone - List
+5. Bucket policy - policy generator: S3 bucket policy, Effect: Allow, Principal: *, Actions: GetObject, set ARN/*
+6. URL: http://my-first-live-app.s3-website-us-east-1.amazonaws.com
+￼
+Serving with CloudFront
+1. S3 - create bucket - my-second-live-app (private), upload files. Trying to access file within the bucket gives AccessDenied error
+2. ClouldFront - distribution. Origin access: origin access control settings.
+3. Create new OAC (sign requests). WAF: disabled. Default root object: index.html. Create distribution.
+4. S3 bucket policy needs to be updated reminder - copy policy - go to s3 bucket permissions. Paste to bucket policy.
+5. URL https://d1yk8xz3gtf71c.cloudfront.net 
+
+Automated deployment
+1. Setup serverless.yml for a new bucket my-sls-live-app
+2. Removed AccessControl: PublicRead because of the error "Bucket cannot have ACLs set with ObjectOwnership's BucketOwnerEnforced setting”
+3. Run cloudfront:setup (sls deploy) to configure
+4. Run cloudfront:build:deploy - to build, deploy and invalidate cache 
+5. URL https://d1rhxecdyslfzz.cloudfront.net/ 
