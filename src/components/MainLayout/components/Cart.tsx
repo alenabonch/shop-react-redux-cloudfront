@@ -6,7 +6,7 @@ import { useCart } from "~/queries/cart";
 
 export default function Cart() {
   const { data } = useCart();
-  const totalItemsCount: number = data?.cart.items.reduce(
+  const totalItemsCount: number | undefined = data?.cart.items.reduce(
       (itemsCount, item) => item.count + itemsCount,
       0
   );

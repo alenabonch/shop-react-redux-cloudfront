@@ -12,7 +12,7 @@ export function useCart() {
         Authorization: `Basic ${localStorage.getItem("authorization_token")}`,
       },
     });
-    return res.data?.data;
+    return (res.data as any)?.data;
   });
 }
 
