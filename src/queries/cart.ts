@@ -2,16 +2,19 @@ import axios, { AxiosError } from "axios";
 import React from "react";
 import { useQuery, useQueryClient, useMutation } from "react-query";
 import API_PATHS from "~/constants/apiPaths";
+import { Cart, CartDTO } from "~/models/Cart";
 import { CartItem } from "~/models/CartItem";
 
 export function useCart() {
-  return useQuery<CartItem[], AxiosError>("cart", async () => {
-    const res = await axios.get<CartItem[]>(`${API_PATHS.cart}/profile/cart`, {
+  return useQuery<CartDTO, AxiosError>("cart", async () => {
+    const res = await axios.get<CartDTO>(`${API_PATHS.cart}/profile/cart`, {
       headers: {
-        Authorization: `Basic ${localStorage.getItem("authorization_token")}`,
+        Authorization: `Basic ${btoa(
+          localStorage.getItem("authorization_token") || ""
+        )}`,
       },
     });
-    return res.data;
+    return (res.data as any)?.data;
   });
 }
 
@@ -29,10 +32,12 @@ export function useInvalidateCart() {
 }
 
 export function useUpsertCart() {
-  return useMutation((values: CartItem) =>
-    axios.put<CartItem[]>(`${API_PATHS.cart}/profile/cart`, values, {
+  return useMutation((updatedCart: Cart) =>
+    axios.put<CartItem[]>(`${API_PATHS.cart}/profile/cart`, updatedCart, {
       headers: {
-        Authorization: `Basic ${localStorage.getItem("authorization_token")}`,
+        Authorization: `Basic ${btoa(
+          localStorage.getItem("authorization_token") || ""
+        )}`,
       },
     })
   );

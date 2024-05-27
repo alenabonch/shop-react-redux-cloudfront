@@ -1,3 +1,4 @@
+import axios from "axios";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "~/components/App/App";
@@ -7,6 +8,20 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { theme } from "~/theme";
+
+axios.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    const { status } = error.response;
+
+    if (status === 403 || status === 401) {
+      alert(error.response.data?.message);
+    }
+    return Promise.reject(error.response);
+  }
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {

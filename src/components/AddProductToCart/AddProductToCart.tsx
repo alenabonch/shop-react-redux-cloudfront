@@ -1,4 +1,5 @@
 import Typography from "@mui/material/Typography";
+import { CartItem } from "~/models/CartItem";
 import { Product } from "~/models/Product";
 import CartIcon from "@mui/icons-material/ShoppingCart";
 import Add from "@mui/icons-material/Add";
@@ -11,22 +12,47 @@ type AddProductToCartProps = {
 };
 
 export default function AddProductToCart({ product }: AddProductToCartProps) {
-  const { data = [], isFetching } = useCart();
+  const { data, isFetching } = useCart();
   const { mutate: upsertCart } = useUpsertCart();
   const invalidateCart = useInvalidateCart();
-  const cartItem = data.find((i) => i.product.id === product.id);
+  const cartItems = data?.cart.items || [];
+  const cartItem = cartItems.find((i) => i.product.id === product.id);
 
   const addProduct = () => {
-    upsertCart(
-      { product, count: cartItem ? cartItem.count + 1 : 1 },
-      { onSuccess: invalidateCart }
-    );
+    if (data?.cart) {
+      let updatedCartItems;
+
+      if (cartItem) {
+        updatedCartItems = cartItems.map((item) =>
+          item.product.id === product.id
+            ? { ...item, count: item.count + 1 }
+            : item
+        );
+      } else {
+        updatedCartItems = [...cartItems, { product, count: 1 } as CartItem];
+      }
+      upsertCart(
+        { ...data.cart, items: updatedCartItems },
+        { onSuccess: invalidateCart }
+      );
+    }
   };
 
   const removeProduct = () => {
-    if (cartItem) {
+    if (data?.cart && cartItem) {
+      let updatedCartItems;
+
+      if (cartItem.count > 1) {
+        updatedCartItems = cartItems.map((item) =>
+          item.product.id === product.id
+            ? { ...item, count: item.count - 1 }
+            : item
+        );
+      } else {
+        updatedCartItems = cartItems.filter((item) => item.product.id !== product.id);
+      }
       upsertCart(
-        { ...cartItem, count: cartItem.count - 1 },
+        { ...data.cart, items: updatedCartItems },
         { onSuccess: invalidateCart }
       );
     }
